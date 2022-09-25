@@ -40,29 +40,32 @@
         btnDelete.addEventListener('click',(e)=>{
             remove(ref(database,'/'));
         });
-
+        // 데이터가 있을 때마다 새로 불러와라
         onValue(ref(database, '/'), (snapshot)=>{
             //console.log(snapshot);
+            //1. 기존에 있던 HTML들 다 삭제하기
+            document.getElementById('todo_list').innerHTML="";
+            //2. 데이터 불러오기
             snapshot.forEach((childSnapshot)=>{
                 const childKey = childSnapshot.key;
                 const childData = childSnapshot.val();
                 console.log(childKey);
                 console.log(childData);
-
+                //3. 카드 div를 todo_list div에 끼워주기
                 let div = document.createElement('div');
                 div.setAttribute('class', 'card card-body mt-1');
                 div.setAttribute('id', 'div'+childKey);
                 document.getElementById('todo_list').appendChild(div);
-
+                //4. 내용들어갈 div만들기
                 let div2 = document.createElement('div');
                 div2.setAttribute('id', 'div2'+childKey);
                 document.getElementById('div'+childKey).appendChild(div2);
-
+                //5. 내용들어갈 div에 표시할 글자 나타내기
                 let span = document.createElement('span');
-                let spanText = document.createTextNode(childData);
+                let spanText = document.createTextNode(childData.todo);
                 span.appendChild(spanText);
                 document.getElementById('div2'+childKey).appendChild(span);
-
+                //6. 삭제 버튼 div에 나타내기
                 let btn = document.createElement('button');
                 btn.setAttribute('class',"btn btn-primary float-end");
                 btn.innerHTML = "삭제";
@@ -75,12 +78,6 @@
 <body>
     <div class="container mt-3">
         <h3>todo_list</h3>
-        <div class="card card-body mt-2">
-            <div>
-                <span>잠자기</span> 
-                <button class="btn btn-primary float-end">삭제</button>
-            </div>
-        </div>
         <div class="card card-body mt-2">
             <div>
                 게임하기
