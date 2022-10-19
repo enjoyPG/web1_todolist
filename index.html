@@ -1,4 +1,5 @@
 <!-- web1todolist -->
+<!-- 할 일을 입력하면 자동으로 데이터베이스에 할일이 기록 됨 -->
 <!DOCTYPE html>
 <html lang="en">
 <head> 
@@ -31,15 +32,42 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-
+        //입력하기 버튼 누르면 동작
         submit.addEventListener('click',(e)=>{
-            set(push(ref(database, '/')),{
-                todo: document.getElementById('plan').value
-            });
+            addData();
         });
-        btnDelete.addEventListener('click',(e)=>{
-            remove(ref(database,'/'));
+        //엔터키 누르면 자동 입력
+        plan.addEventListener('keypress', (e)=>{
+            //console.log(e);
+            //키 입력이 시작되면 경고창 삭제
+            document.getElementById('inputAlert').style.display="none";
+            //엔터를 치면 데이터 입력
+            if(e.key=='Enter'){
+                addData();
+            }
         });
+
+        const addData = () =>{
+            if(document.getElementById('plan').value){
+                set(push(ref(database, '/')),{
+                    todo: document.getElementById('plan').value
+                });
+                document.getElementById('plan').value = "";
+                document.getElementById('plan').focus();
+            }
+            else{
+                document.getElementById('inputAlert').style.display="block";
+            }
+        }
+
+        const todo_delete = (e) =>{
+            console.log(e.target.id); //타켓(삭제버튼)의 아이디 받아옴
+            remove(ref(database,'/'+e.target.id));
+        }
+
+        // btnDelete.addEventListener('click',(e)=>{
+        //     remove(ref(database,'/'));
+        // });
         // 데이터가 있을 때마다 새로 불러와라
         onValue(ref(database, '/'), (snapshot)=>{
             //console.log(snapshot);
@@ -65,11 +93,15 @@
                 let spanText = document.createTextNode(childData.todo);
                 span.appendChild(spanText);
                 document.getElementById('div2'+childKey).appendChild(span);
+                
                 //6. 삭제 버튼 div에 나타내기
                 let btn = document.createElement('button');
                 btn.setAttribute('class',"btn btn-primary float-end");
                 btn.innerHTML = "삭제";
+                btn.setAttribute('id', childKey);
                 document.getElementById('div2'+childKey).appendChild(btn);
+                //7. 삭제 이벤트 만들기
+                btn.addEventListener('click', todo_delete);
             });
         });
 
@@ -78,18 +110,18 @@
 <body>
     <div class="container mt-3">
         <h3>todo_list</h3>
-        <div class="card card-body mt-2">
+        <div id="todo_list"></div>
+        <!-- <div class="card card-body mt-2">
             <div>
-                게임하기
+                잠자기
                 <button class="btn btn-primary float-end">삭제</button>
             </div>
-        </div>
-        <div id="todo_list"></div>
+        </div> -->
+        <div id="inputAlert" style="display:none" class="alert alert-danger mt-1">할 일을 입력하세요!</div>
         <div class="mt-2">
             <input id="plan" class="form-control" placeholder="할 일을 입력하세요." type="text">
             <button type="submit" id="submit" class="btn btn-primary mt-2 w-100">입력하기</button>
         </div>
-        <button type="button" id="btnDelete">삭제하기</button>
     </div>
     
 </body>
